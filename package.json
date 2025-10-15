@@ -1,0 +1,58 @@
+{
+  "name": "3d-flipbook",
+  "version": "1.0.0",
+  "description": "A modern 3D flipbook component for web applications with CSS and WebGL rendering modes",
+  "author": "WebDev4Life",
+  "license": "MIT",
+  "homepage": "https://github.com/akimzmerli/3d-flipbook",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akimzmerli/3d-flipbook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akimzmerli/3d-flipbook/issues"
+  },
+  "keywords": [
+    "flipbook",
+    "3d",
+    "react",
+    "vue",
+    "typescript",
+    "webgl",
+    "css",
+    "animation",
+    "pdf",
+    "book",
+    "page-flip"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@10.8.1",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
+    "clean": "pnpm -r clean",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check",
+    "test": "pnpm -r test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": "0.32.6"
+    }
+  }
+}
