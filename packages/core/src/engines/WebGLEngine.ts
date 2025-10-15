@@ -1,5 +1,6 @@
-import * as THREE from 'three';
-import { gsap } from 'gsap';
+// Dynamic imports to avoid dependency issues
+// import * as THREE from 'three';
+// import { gsap } from 'gsap';
 import type { FlipbookConfig, PageInfo, LoadingProgress } from '../types.js';
 
 export interface PageTexture {

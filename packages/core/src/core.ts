@@ -1,5 +1,5 @@
 import type { FlipbookConfig, FlipbookInstance, PageInfo, LoadingProgress } from './types.js';
-import { WebGLEngine } from './engines/WebGLEngine.js';
+import { SimpleWebGLEngine } from './engines/SimpleWebGLEngine.js';
 import { CSSEngine } from './engines/CSSEngine.js';
 
 /**
@@ -59,7 +59,7 @@ export class Flipbook implements FlipbookInstance {
     
     // Create appropriate engine based on render mode
     if (this.config.renderMode === 'webgl') {
-      this.engine = new WebGLEngine(this.config);
+      this.engine = new SimpleWebGLEngine(this.config);
     } else {
       this.engine = new CSSEngine(this.config);
     }

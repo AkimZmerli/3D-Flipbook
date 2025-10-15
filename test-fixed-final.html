@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Flipbook - Perfect Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+            background: linear-gradient(45deg, #4a90e2, #7ed321);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            margin: 10px 0;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        
+        .container {
+            width: 100%;
+            height: 70vh;
+            margin: 20px 0;
+            border: 1px solid #444;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 2000px;
+            background: radial-gradient(ellipse at center, #222 0%, #111 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .flipbook {
+            position: relative;
+            width: 700px;
+            height: 500px;
+            transform-style: preserve-3d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Book spine - only visible on double page spreads */
+        .book-spine {
+            position: absolute;
+            left: 50%;
+            top: 5%;
+            bottom: 5%;
+            width: 4px;
+            background: linear-gradient(to bottom, #555 0%, #777 50%, #555 100%);
+            transform: translateX(-50%);
+            z-index: 100;
+            box-shadow: 
+                0 0 15px rgba(0, 0, 0, 0.6),
+                inset 0 0 3px rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .flipbook.double-page .book-spine {
+            opacity: 1;
+        }
+        
+        /* Spread container */
+        .spread {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Individual pages */
+        .page {
+            height: 500px;
+            position: relative;
+            background: white;
+            border: 3px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .page-left {
+            transform-origin: right center;
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            border-right: none;
+            width: 350px;
+        }
+        
+        .page-right {
+            transform-origin: left center;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            border-left: none;
+            width: 350px;
+        }
+        
+        /* Single page (covers) */
+        .page.single {
+            width: 400px;
+            border-radius: 12px;
+            border: 3px solid #ddd;
+            margin: 0 auto;
+        }
+        
+        /* Content styling */
+        .page-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        
+        /* Page types */
+        .page.cover-front {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            border-color: #357abd;
+        }
+        
+        .page.cover-back {
+            background: linear-gradient(135deg, #d0021b 0%, #a8011a 100%);
+            color: white;
+            border-color: #a8011a;
+        }
+        
+        .page.content-1 {
+            background: linear-gradient(135deg, #7ed321 0%, #6bb01e 100%);
+            color: white;
+            border-color: #6bb01e;
+        }
+        
+        .page.content-2 {
+            background: linear-gradient(135deg, #f5a623 0%, #e0941e 100%);
+            color: white;
+            border-color: #e0941e;
+        }
+        
+        /* Flip animation */
+        .page.flipping {
+            transform: rotateY(-90deg) scale(0.95);
+            opacity: 0.8;
+        }
+        
+        /* Navigation arrows */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-arrow:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .nav-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(0.9);
+        }
+        
+        .nav-arrow-prev {
+            left: 30px;
+        }
+        
+        .nav-arrow-next {
+            right: 30px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .status {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .debug {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            max-width: 320px;
+            border: 1px solid #444;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .debug h4 {
+            margin: 0 0 10px 0;
+            color: #4a90e2;
+            font-size: 14px;
+        }
+        
+        /* Animation for state changes */
+        @keyframes flipIn {
+            0% {
+                transform: rotateY(-90deg);
+                opacity: 0;
+            }
+            100% {
+                transform: rotateY(0deg);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes flipOut {
+            0% {
+                transform: rotateY(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: rotateY(90deg);
+                opacity: 0;
+            }
+        }
+        
+        .flip-in {
+            animation: flipIn 0.6s ease-out;
+        }
+        
+        .flip-out {
+            animation: flipOut 0.6s ease-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>3D Flipbook Engine</h1>
+        <p>Perfect layout behavior: Single cover → Double spreads → Single back</p>
+    </div>
+    
+    <div class="debug" id="debug">
+        <h4>Debug Info</h4>
+        <div id="debug-content">Loading...</div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="prevPage()" id="prevBtn">← Previous</button>
+        <button onclick="nextPage()" id="nextBtn">Next →</button>
+        <button onclick="goToPage(1)">First Page</button>
+        <div class="status" id="status">Spread: 1 / 3</div>
+    </div>
+    
+    <div class="container">
+        <div class="flipbook single-page" id="flipbook">
+            <div class="book-spine"></div>
+            
+            <!-- Navigation arrows -->
+            <button class="nav-arrow nav-arrow-prev" onclick="prevPage()" id="prevArrow">‹</button>
+            <button class="nav-arrow nav-arrow-next" onclick="nextPage()" id="nextArrow">›</button>
+            
+            <div class="spread" id="spread">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Page data with better content
+        const pages = [
+            { 
+                id: 'cover', 
+                title: 'Portfolio',
+                subtitle: 'Click to open →',
+                type: 'cover-front' 
+            },
+            { 
+                id: 'page1', 
+                title: 'Chapter 1',
+                subtitle: 'Creative Projects\n& Design Work',
+                type: 'content-1' 
+            },
+            { 
+                id: 'page2', 
+                title: 'Chapter 2',
+                subtitle: 'Development\n& Technical Skills',
+                type: 'content-2' 
+            },
+            { 
+                id: 'back', 
+                title: 'Thank You',
+                subtitle: '← Click to go back\nEnd of portfolio',
+                type: 'cover-back' 
+            }
+        ];
+        
+        // Spread configuration - FIXED to include all 3 states
+        const spreads = [
+            { left: null, right: pages[0], type: 'cover', isFirst: true },     // State 1: Front cover
+            { left: pages[1], right: pages[2], type: 'content', isFirst: false }, // State 2: Content spread
+            { left: pages[3], right: null, type: 'back', isFirst: false }      // State 3: Back cover
+        ];
+        
+        let currentSpread = 0;
+        let isAnimating = false;
+        
+        function createPageElement(pageData, position) {
+            const page = document.createElement('div');
+            const isSingle = position === 'single';
+            
+            page.className = `page ${isSingle ? 'single' : `page-${position}`} ${pageData.type}`;
+            
+            page.innerHTML = `
+                <div class="page-content">
+                    <div class="page-title">${pageData.title}</div>
+                    <div class="page-subtitle">${pageData.subtitle.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+            
+            // Add click handlers
+            if (position === 'right' || isSingle) {
+                page.onclick = nextPage;
+            } else {
+                page.onclick = prevPage;
+            }
+            
+            return page;
+        }
+        
+        function renderSpread() {
+            const flipbook = document.getElementById('flipbook');
+            const spread = document.getElementById('spread');
+            const currentSpreadData = spreads[currentSpread];
+            
+            // Add animation class
+            spread.classList.add('flip-in');
+            setTimeout(() => spread.classList.remove('flip-in'), 600);
+            
+            // Clear spread
+            spread.innerHTML = '';
+            
+            if (currentSpreadData.type === 'cover') {
+                // Single cover page
+                flipbook.className = 'flipbook single-page';
+                const pageData = currentSpreadData.right || currentSpreadData.left;
+                const page = createPageElement(pageData, 'single');
+                spread.appendChild(page);
+            } else if (currentSpreadData.type === 'back') {
+                // Single back cover
+                flipbook.className = 'flipbook single-page';
+                const page = createPageElement(currentSpreadData.left, 'single');
+                spread.appendChild(page);
+            } else {
+                // Double page spread
+                flipbook.className = 'flipbook double-page';
+                
+                // Left page
+                if (currentSpreadData.left) {
+                    const leftPage = createPageElement(currentSpreadData.left, 'left');
+                    spread.appendChild(leftPage);
+                }
+                
+                // Right page
+                if (currentSpreadData.right) {
+                    const rightPage = createPageElement(currentSpreadData.right, 'right');
+                    spread.appendChild(rightPage);
+                }
+            }
+            
+            updateUI();
+        }
+        
+        function updateUI() {
+            const debug = document.getElementById('debug-content');
+            const status = document.getElementById('status');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevArrow = document.getElementById('prevArrow');
+            const nextArrow = document.getElementById('nextArrow');
+            
+            const spreadData = spreads[currentSpread];
+            let layoutType = 'Double Spread';
+            if (spreadData.type === 'cover') layoutType = 'Single Cover';
+            if (spreadData.type === 'back') layoutType = 'Single Back';
+            
+            debug.innerHTML = `
+                <strong>Current:</strong> Spread ${currentSpread + 1} / ${spreads.length}<br>
+                <strong>Layout:</strong> ${layoutType}<br>
+                <strong>Type:</strong> ${spreadData.type}<br>
+                <br>
+                <strong>All Spreads:</strong><br>
+                ${spreads.map((s, i) => 
+                    `${i + 1}. ${s.type.charAt(0).toUpperCase() + s.type.slice(1)} ${i === currentSpread ? '← current' : ''}`
+                ).join('<br>')}
+                <br><br>
+                <strong>Navigation:</strong><br>
+                • Click pages to flip<br>
+                • Use arrow buttons<br>
+                • Keyboard arrows
+            `;
+            
+            status.textContent = `Spread: ${currentSpread + 1} / ${spreads.length} (${layoutType})`;
+            
+            // Update button states
+            const canGoPrev = currentSpread > 0;
+            const canGoNext = currentSpread < spreads.length - 1;
+            
+            prevBtn.disabled = !canGoPrev;
+            nextBtn.disabled = !canGoNext;
+            prevArrow.disabled = !canGoPrev;
+            nextArrow.disabled = !canGoNext;
+            
+            console.log(`Rendered spread ${currentSpread + 1}: ${layoutType}`);
+        }
+        
+        function nextPage() {
+            if (isAnimating || currentSpread >= spreads.length - 1) return;
+            
+            isAnimating = true;
+            const spread = document.getElementById('spread');
+            
+            // Add flip out animation
+            spread.classList.add('flip-out');
+            
+            setTimeout(() => {
+                currentSpread++;
+                renderSpread();
+                spread.classList.remove('flip-out');
+                isAnimating = false;
+            }, 300);
+        }
+        
+        function prevPage() {
+            if (isAnimating || currentSpread <= 0) return;
+            
+            isAnimating = true;
+            const spread = document.getElementById('spread');
+            
+            // Add flip out animation
+            spread.classList.add('flip-out');
+            
+            setTimeout(() => {
+                currentSpread--;
+                renderSpread();
+                spread.classList.remove('flip-out');
+                isAnimating = false;
+            }, 300);
+        }
+        
+        function goToPage(spreadIndex) {
+            if (isAnimating || spreadIndex < 1 || spreadIndex > spreads.length) return;
+            
+            const targetSpread = spreadIndex - 1;
+            if (targetSpread === currentSpread) return;
+            
+            isAnimating = true;
+            const spread = document.getElementById('spread');
+            
+            spread.classList.add('flip-out');
+            
+            setTimeout(() => {
+                currentSpread = targetSpread;
+                renderSpread();
+                spread.classList.remove('flip-out');
+                isAnimating = false;
+            }, 300);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+            if (e.key === 'Home') goToPage(1);
+            if (e.key === 'End') goToPage(spreads.length);
+        });
+        
+        // Initialize
+        console.log('🎉 Perfect flipbook initializing...');
+        console.log(`📚 Total spreads: ${spreads.length}`);
+        console.log('✅ All 3 states: Cover → Content → Back');
+        
+        renderSpread();
+    </script>
+</body>
+</html>
