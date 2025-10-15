@@ -47,37 +47,143 @@ export class CSSEngine {
   private createStructure(): void {
     // Create main flipbook structure
     this.flipbookElement = document.createElement('div');
-    this.flipbookElement.className = '3d-flipbook-wrapper';
+    this.flipbookElement.className = 'flipbook-wrapper';
     if (this.config.className) {
       this.flipbookElement.classList.add(this.config.className);
     }
     
+    // Set proper sizing
+    this.flipbookElement.style.width = '100%';
+    this.flipbookElement.style.height = '100%';
+    this.flipbookElement.style.display = 'flex';
+    this.flipbookElement.style.flexDirection = 'column';
+    this.flipbookElement.style.alignItems = 'center';
+    this.flipbookElement.style.justifyContent = 'center';
+    this.flipbookElement.style.position = 'relative';
+    
     this.flipbookElement.innerHTML = `
-      <div class="3d-flipbook-container">
-        <div class="3d-flipbook">
-          <div class="spread">
-            <div class="book-spine"></div>
-            <div class="page page-left"></div>
-            <div class="page page-right"></div>
+      <div class="flipbook-container" style="
+        position: relative;
+        width: 100%;
+        height: calc(100% - 60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 2000px;
+      ">
+        <div class="flipbook single-page" style="
+          position: relative;
+          width: 600px;
+          height: 400px;
+          transform-style: preserve-3d;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        ">
+          <div class="book-spine" style="
+            position: absolute;
+            left: 50%;
+            top: 5%;
+            bottom: 5%;
+            width: 3px;
+            background: linear-gradient(to bottom, #555, #777, #555);
+            transform: translateX(-50%);
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border-radius: 1px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+          "></div>
+          
+          <div class="spread" style="
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: all 0.8s ease;
+          ">
+            <div class="page page-left" style="
+              width: 300px;
+              height: 400px;
+              background: white;
+              border: 2px solid #ddd;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 24px;
+              font-weight: bold;
+              color: #333;
+              cursor: pointer;
+              border-radius: 8px 0 0 8px;
+              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            "></div>
+            <div class="page page-right" style="
+              width: 300px;
+              height: 400px;
+              background: white;
+              border: 2px solid #ddd;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 24px;
+              font-weight: bold;
+              color: #333;
+              cursor: pointer;
+              border-radius: 0 8px 8px 0;
+              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+              border-left: none;
+            "></div>
           </div>
         </div>
         
         ${this.config.navigation?.arrows ? `
-          <button class="nav-button nav-button-prev" data-direction="prev">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
-          </button>
-          <button class="nav-button nav-button-next" data-direction="next">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
-          </button>
+          <button class="nav-button nav-button-prev" data-direction="prev" style="
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 200;
+          ">‹</button>
+          <button class="nav-button nav-button-next" data-direction="next" style="
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 200;
+          ">›</button>
         ` : ''}
       </div>
       
       ${this.config.navigation?.pageIndicator ? `
-        <div class="page-indicator">
+        <div class="page-indicator" style="
+          margin-top: 1rem;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 14px;
+          text-align: center;
+        ">
           Page 1 / 1
         </div>
       ` : ''}

@@ -22,5 +22,5 @@ export type {
 } from './types.js';
 
 // Export engines for advanced usage
-export { WebGLEngine } from './engines/WebGLEngine.js';
+export { SimpleWebGLEngine } from './engines/SimpleWebGLEngine.js';
 export { CSSEngine } from './engines/CSSEngine.js';
