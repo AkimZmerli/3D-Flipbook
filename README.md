@@ -1,11 +1,13 @@
 # 3D Flipbook
 
-A modern, lightweight 3D flipbook compon![flipbook-demo](https://github.com/user-attachments/assets/7dea923a-f6c3-4101-81ea-d81a6b7cb94e)
-ent for web applications. Features both CSS and WebGL rendering modes with smooth page flip animations, framework-agnostic core, and React components.
+A modern, lightweight 3D flipbook component for web applications. Features both CSS and WebGL rendering modes with smooth page flip animations, framework-agnostic core, and React components.
 
 ![npm version](https://img.shields.io/npm/v/@3d-flipbook/core)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)
+
+
+![flipbook-demo](https://github.com/user-attachments/assets/7dea923a-f6c3-4101-81ea-d81a6b7cb94e)
 
 ## ✨ Features
 
